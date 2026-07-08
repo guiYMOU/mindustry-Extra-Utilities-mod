@@ -5,16 +5,38 @@ import ExtraUtilities.worlds.blocks.production.MinerPoint;
 import ExtraUtilities.worlds.blocks.turret.wall.Domain;
 import ExtraUtilities.worlds.blocks.turret.wall.ReleaseShieldWall;
 import ExtraUtilities.worlds.entity.bullet.CtrlMissile;
+import arc.func.Prov;
 import arc.math.geom.Position;
+import arc.util.ArcRuntimeException;
 import mindustry.Vars;
 import mindustry.gen.*;
 import mindustry.net.Net;
 import mindustry.net.NetConnection;
+import mindustry.net.Packet;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.environment.Floor;
 
+import java.lang.reflect.Method;
+
 public class EUCall {
+    private static Method registerPacketMethod;
+
+    static{
+        try{
+            registerPacketMethod = Net.class.getMethod("registerPacket", Prov.class);
+        }catch(NoSuchMethodException e){
+            throw new ArcRuntimeException(e);
+        }
+    }
+
+    private static <T extends Packet> void reg(Prov<T> prov){
+        try{
+            registerPacketMethod.invoke(null, prov);
+        }catch(Exception e){
+            throw new ArcRuntimeException(e);
+        }
+    }
     public static void minerPointDroneSpawned(Tile tile, int id) {
         if (Vars.net.server() || !Vars.net.active()) {
             MinerPoint.minerPointDroneSpawned(tile, id);
@@ -93,10 +115,10 @@ public class EUCall {
     }
 
     public static void registerPackets(){
-        Net.registerPacket(MinerPointDroneSpawnedCallPacket::new);
-        Net.registerPacket(MinerPointConfigCallPacket::new);
-        Net.registerPacket(ReleaseShieldWallBuildSyncPacket::new);
-        Net.registerPacket(DomainSyncPacket::new);
-        Net.registerPacket(SetFloorOnlyPacket::new);
+        reg(MinerPointDroneSpawnedCallPacket::new);
+        reg(MinerPointConfigCallPacket::new);
+        reg(ReleaseShieldWallBuildSyncPacket::new);
+        reg(DomainSyncPacket::new);
+        reg(SetFloorOnlyPacket::new);
     }
 }
