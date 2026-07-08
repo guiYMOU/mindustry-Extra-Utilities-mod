@@ -2793,7 +2793,10 @@ public class EUUnitTypes {
                     new Rect(-113, -133, 70, 90)
             };
 
-            immunities.addAll(StatusEffects.unmoving, StatusEffects.burning, StatusEffects.sapped, EUStatusEffects.awsl);
+            immunities.add(StatusEffects.unmoving);
+            immunities.add(StatusEffects.burning);
+            immunities.add(StatusEffects.sapped);
+            immunities.add(EUStatusEffects.awsl);
             abilities.add(new PcShieldArcAbility(){{
                 whenShooting = false;
                 radius = 8 * 8;
@@ -3246,7 +3249,13 @@ public class EUUnitTypes {
             engineSize = 6;
             engineOffset = 22.3f;
 
-            immunities.addAll(StatusEffects.wet, StatusEffects.freezing, StatusEffects.sapped, StatusEffects.disarmed, StatusEffects.electrified, EUStatusEffects.speedDown, EUStatusEffects.awsl);
+            immunities.add(StatusEffects.wet);
+            immunities.add(StatusEffects.freezing);
+            immunities.add(StatusEffects.sapped);
+            immunities.add(StatusEffects.disarmed);
+            immunities.add(StatusEffects.electrified);
+            immunities.add(EUStatusEffects.speedDown);
+            immunities.add(EUStatusEffects.awsl);
             
             abilities.add(
                     new SuppressionFieldAbility() {{
@@ -3805,7 +3814,11 @@ public class EUUnitTypes {
             alwaysShootWhenMoving = true;
             maxRange = 50 * 8f;
 
-            immunities.addAll(StatusEffects.wet, StatusEffects.unmoving, StatusEffects.disarmed, StatusEffects.slow, EUStatusEffects.awsl);
+            immunities.add(StatusEffects.wet);
+            immunities.add(StatusEffects.unmoving);
+            immunities.add(StatusEffects.disarmed);
+            immunities.add(StatusEffects.slow);
+            immunities.add(EUStatusEffects.awsl);
 
             weapons.add(
                     new Weapon(name("arcana-wm")){{
