@@ -13,7 +13,6 @@ import arc.graphics.Color;
 import arc.graphics.Pixmap;
 import arc.graphics.Pixmaps;
 import arc.graphics.g2d.Draw;
-import arc.graphics.g2d.Font;
 import arc.graphics.g2d.TextureRegion;
 import arc.math.Mat;
 import arc.math.Mathf;
@@ -22,13 +21,9 @@ import arc.scene.Element;
 import arc.scene.Group;
 import arc.scene.event.Touchable;
 import arc.scene.style.TextureRegionDrawable;
-import arc.scene.ui.CheckBox;
-import arc.scene.ui.Label;
-import arc.scene.ui.ScrollPane;
-import arc.scene.ui.Slider;
+import arc.scene.ui.*;
 import arc.scene.ui.layout.Scl;
 import arc.scene.ui.layout.Table;
-import arc.struct.OrderedMap;
 import arc.struct.Seq;
 import arc.util.*;
 import mindustry.Vars;
@@ -37,30 +32,21 @@ import mindustry.content.Blocks;
 import mindustry.content.StatusEffects;
 import mindustry.ctype.UnlockableContent;
 import mindustry.game.EventType.*;
+import mindustry.gen.Bullet;
 import mindustry.gen.Icon;
-import mindustry.gen.Iconc;
 import mindustry.gen.Tex;
 import mindustry.graphics.Pal;
-import mindustry.maps.Map;
-import mindustry.maps.Maps;
 import mindustry.mod.*;
-import mindustry.type.Liquid;
 import mindustry.ui.Fonts;
 import mindustry.ui.Styles;
 import mindustry.ui.dialogs.*;
 import mindustry.world.Block;
 import mindustry.world.meta.Stat;
-import mindustry.world.meta.StatCat;
-import mindustry.world.meta.StatValue;
-import mindustry.world.meta.Stats;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 import static ExtraUtilities.input.EUAtLoad.hasOtherContentMod;
-import static arc.Core.app;
 import static arc.Core.settings;
 import static mindustry.Vars.*;
 
@@ -157,16 +143,10 @@ public class ExtraUtilitiesMod extends Mod{
                 });
                 cont.row();
                 updateLog.clear();
-                Block T2steam = getJsNameBlock("T2-steam-generator");
-                Block th2 = getJsNameBlock("Th2");
-                Block hurricane = getJsNameBlock("hurricane");
-                Block magstorm = getJsNameBlock("magstorm");
 
                 updateLog.addAll(
-                        T2steam, th2, EUBlocks.thermoelectricGenerator,
-                        EUBlocks.shootingStar, EUBlocks.celebrationMk2,
-                        hurricane, magstorm,
-                        Blocks.foreshadow,
+                        EUBlocks.T2carbideCrucible,
+                        EUBlocks.anti_Missile, EUBlocks.blackhole,
                         EUUnitTypes.suzerain,
                         EUBlocks.guiY
                 );
@@ -291,6 +271,8 @@ public class ExtraUtilitiesMod extends Mod{
         Events.on(ClientLoadEvent.class, e -> Time.runTask(6f, ExtraUtilitiesMod::log));
 
         Log.info("Extra Utilities: building rand subtitle...");
+
+        //Events.on(ClientLoadEvent.class, e -> hookWriteController());
     }
 
     public Graphics.Cursor newCursor(String filename){
@@ -400,7 +382,7 @@ public class ExtraUtilitiesMod extends Mod{
                 dialog.cont.add(toText("eu-reset-exit"));
                 dialog.buttons.button("OK", exit).center().size(150, 50);
 
-                ui.settings.addCategory(toText("EU-SET"), name("fireWork"), settingsTable -> {
+                ui.settings.addCategory(toText("EU-SET"), name("EUSETTING"), settingsTable -> {
 //                    settingsTable.sliderPref("min-zoom", 10, 0, 60, (i) -> {
 //                        if(!Vars.headless) Vars.renderer.minZoom = i / 10f;
 //                        return Vars.renderer.minZoom + "x";
@@ -481,7 +463,15 @@ public class ExtraUtilitiesMod extends Mod{
                     settingsTable.pref(new SettingsMenuDialog.SettingsTable.CheckSetting("eu-plug-in-mode", false, null) {
                         @Override
                         public void add(SettingsMenuDialog.SettingsTable table) {
-                            CheckBox box = new CheckBox(title);
+                            //CheckBox box = new CheckBox(title);
+                            Button box = new Button(Styles.grayt);
+                            box.background(Styles.grayPanel);
+                            box.margin(10f);
+
+                            box.add(new Image()).update(i -> i.setDrawable(box.isOver() ? (box.isChecked() ? Tex.checkOnOver : Tex.checkOver) : box.isChecked() ? Tex.checkOn : Tex.checkOff))
+                                    .size(32f).padRight(8f).padLeft(-4f);
+
+                            box.add(title);
 
                             box.update(() -> box.setChecked(settings.getBool(name)));
 
@@ -523,7 +513,15 @@ public class ExtraUtilitiesMod extends Mod{
                         settingsTable.pref(new SettingsMenuDialog.SettingsTable.CheckSetting("eu-hard-mode", false, null) {
                             @Override
                             public void add(SettingsMenuDialog.SettingsTable table) {
-                                CheckBox box = new CheckBox(title);
+//                                CheckBox box = new CheckBox(title);
+                                Button box = new Button(Styles.grayt);
+                                box.background(Styles.grayPanel);
+                                box.margin(10f);
+
+                                box.add(new Image()).update(i -> i.setDrawable(box.isOver() ? (box.isChecked() ? Tex.checkOnOver : Tex.checkOver) : box.isChecked() ? Tex.checkOn : Tex.checkOff))
+                                        .size(32f).padRight(8f).padLeft(-4f);
+
+                                box.add(title);
 
                                 box.update(() -> box.setChecked(settings.getBool(name)));
 

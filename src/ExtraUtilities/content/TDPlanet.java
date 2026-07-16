@@ -112,7 +112,7 @@ public class TDPlanet {
             ruleSetter = (r) -> {
                 r.waveTeam = Team.crux;
                 r.placeRangeCheck = false;
-                r.showSpawns = false;
+                //r.showSpawns = false;
                 r.coreDestroyClear = true;
             };
             allowCampaignRules = true;

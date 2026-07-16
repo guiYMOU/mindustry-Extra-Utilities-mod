@@ -88,6 +88,7 @@ public class EUTechTree {
         addToNode(Blocks.slagHeater, () -> node(EUBlocks.slagReheater));
         addToNode(Blocks.electricHeater, () -> node(EUBlocks.thermalHeater));
         addToNode(Blocks.oxidationChamber, () -> node(EUBlocks.T2oxide));
+        addToNode(Blocks.carbideCrucible, () -> node(EUBlocks.T2carbideCrucible));
         addToNode(Blocks.plasmaBore, () -> node(EUBlocks.minerPoint, () -> node(EUBlocks.minerCenter)));
         addToNode(Blocks.reinforcedPump, () -> node(EUBlocks.arkyciteExtractor, () -> node(EUBlocks.cyanogenPyrolysis)));
         addToNode(Blocks.reinforcedLiquidRouter, () -> {

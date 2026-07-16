@@ -914,6 +914,26 @@ public class EUFx {
 
         float tin = e.time < 30 ? Math.min(1, e.fin() * 4) : Math.min(1, e.fout() * 4);
         tin = Interp.fastSlow.apply(tin);
-        Fonts.outline.draw(s, dx, dy, e.color, 0.8f * tin, false, 1);
+        Fonts.outline.draw(s, dx, dy, e.color, Math.max(0.001f, 0.8f * tin), false, 1);
+    });
+
+    public static Effect rgX = new Effect(60, (e) -> {
+        Object data = e.data;
+        if (data instanceof Float size) {
+            float fin = Math.min(1, e.finpow() * 5);
+
+            for(int i = 0; i < 4; ++i) {
+                float a = (float)(45 + 90 * i);
+                float z = Draw.z();
+                Draw.z(58);
+                Draw.color(EUGet.MIKU);
+                Drawf.tri(e.x, e.y, 2 * size * e.foutpow(), 8 * size * fin, a);
+                Draw.z(59);
+                Draw.color(Color.black);
+                Drawf.tri(e.x, e.y, 2 * size * e.foutpow(), 7.5f * size * fin, a);
+                Draw.z(z);
+            }
+        }
+
     });
 }

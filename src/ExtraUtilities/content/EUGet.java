@@ -117,13 +117,14 @@ public class EUGet {
             "标枪",
             "花杨永瀛",
             "灰尘庙",
-            "维生素",
             "鱼鱼",
-            "penitent"
+            "penitent",
+            "桉"
     };
     public static String[] developers = {
             "guiY",
-            "carrot"
+            "carrot",
+            "维生素"
     };
     public static IntMap<Seq<UnlockableContent>> donorMap = new IntMap<>();
     public static IntMap<Seq<UnlockableContent>> developerMap = new IntMap<>();
@@ -138,17 +139,19 @@ public class EUGet {
         donorMap.put(3, new Seq<>());
         //灰尘庙
         donorMap.put(4, new Seq<>());
-        //维生素
-        donorMap.put(5, new Seq<>());
         //鱼鱼
-        donorMap.put(6, new Seq<>());
+        donorMap.put(5, new Seq<>());
         //penitent
+        donorMap.put(6, new Seq<>());
+        //桉
         donorMap.put(7, new Seq<>());
 
         //guiY
         developerMap.put(0, new Seq<>());
         //carrot
         developerMap.put(1, new Seq<>());
+        //维生素
+        developerMap.put(2, new Seq<>());
     }
     public static Seq<UnlockableContent> donorItems = new Seq<>();
     public static Seq<UnlockableContent> developerItems = new Seq<>();

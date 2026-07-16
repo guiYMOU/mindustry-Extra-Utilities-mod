@@ -1,5 +1,6 @@
 package ExtraUtilities.content;
 
+import ExtraUtilities.ExtraUtilitiesMod;
 import ExtraUtilities.ai.DefenderHealAI;
 import ExtraUtilities.ai.MinerPointAI;
 import ExtraUtilities.worlds.drawer.*;
@@ -734,100 +735,223 @@ public class EUUnitTypes {
                 controllable = false;
                 shootSound = Sounds.shootToxopidShotgun;
                 targetInterval = targetSwitchInterval = 10;
-                bullet = new BulletType(){{
-                    damage = 600;
-                    collidesTiles = hittable = absorbable = reflectable = false;
-                    speed = 50;
-                    lifetime = 200 * 8 / speed;
-                    trailEffect = new Effect(40, e -> {
-                        Draw.color(e.color);
-                        rand.setSeed(e.id);
-                        float fin = 1 - Mathf.curve(e.fout(), 0, 0.85f);
-                        Tmp.v1.set((rand.chance(0.5f) ? 20 : -20) * (rand.chance(0.2f) ? 0 : fin), 0).rotate(e.rotation - 90);
-                        float ex = e.x + Tmp.v1.x;
-                        float ey = e.y + Tmp.v1.y;
-                        Draw.rect(name("aim-shoot"), ex, ey, 80 * e.fout(), 80 * e.fout(), e.rotation - 90);
-                    });
-                    trailInterval = 0.2f;
-                    trailColor = eccl;
-                    trailRotation = true;
-                    trailWidth = 8;
-                    trailLength = 12;
-                    hitEffect = despawnEffect = new Effect(90, e -> {
-                        float fin = Mathf.curve(e.fin(), 0, 0.09f);
-                        float fout = Mathf.curve(e.fout(), 0, 0.95f);
-                        for(int i = 0; i < 4; i ++){
-                            float ang = 90 * i;
-                            Draw.z(Layer.effect);
-                            Draw.color(eccb);
-                            Drawf.tri(e.x, e.y, 19 * fout, 90 * fin, ang);
-                            Drawf.tri(e.x, e.y, 15 * fout, 72 * fin, 45 + ang);
+                bullet = new BulletType() {{
+                        damage = 600;
+                        collidesTiles = hittable = absorbable = reflectable = false;
+                        speed = 50;
+                        lifetime = 1600 / speed;
+                        trailEffect = new Effect(40, (e) -> {
+                            Draw.color(e.color);
+                            Fx.rand.setSeed(e.id);
+                            float fin = 1 - Mathf.curve(e.fout(), 0, 0.85f);
+                            Tmp.v1.set((float)(Fx.rand.chance(0.5f) ? 20 : -20) * (Fx.rand.chance(0.2f) ? 0 : fin), 0).rotate(e.rotation - 90);
+                            float ex = e.x + Tmp.v1.x;
+                            float ey = e.y + Tmp.v1.y;
+                            Draw.rect(ExtraUtilitiesMod.name("aim-shoot"), ex, ey, 80 * e.fout(), 80 * e.fout(), e.rotation - 90);
+                        });
+                        trailInterval = 0.2F;
+                        trailColor = eccl;
+                        trailRotation = true;
+                        trailWidth = 8;
+                        trailLength = 12;
+                        hitEffect = despawnEffect = new Effect(90, (e) -> {
+                            float fin = Mathf.curve(e.fin(), 0, 0.09f);
+                            float fout = Mathf.curve(e.fout(), 0, 0.95f);
 
-                            Draw.color(Color.black);
-                            Draw.z(Layer.effect + 1);
-                            Drawf.tri(e.x, e.y, 15 * fout, 82 * fin, ang);
-                            Drawf.tri(e.x, e.y, 11 * fout, 66 * fin, 45 + ang);
-                        }
-                    });
-                    hitSound = Sounds.shootLancer;
-                    hitShake = despawnShake = 10;
-                }
+                            for(int i = 0; i < 4; ++i) {
+                                float ang = (float)(90 * i);
+                                Draw.z(110);
+                                Draw.color(eccb);
+                                Drawf.tri(e.x, e.y, 19 * fout, 90 * fin, ang);
+                                Drawf.tri(e.x, e.y, 15 * fout, 72 * fin, 45 + ang);
+                                Draw.color(Color.black);
+                                Draw.z(111);
+                                Drawf.tri(e.x, e.y, 15 * fout, 82 * fin, ang);
+                                Drawf.tri(e.x, e.y, 11 * fout, 66 * fin, 45 + ang);
+                            }
 
-                    @Override
-                    public void hitEntity(Bullet b, Hitboxc entity, float health) {
-                        if(entity instanceof Unit u && u.type != null){
-                            if(entity instanceof bossEntity) return;
-                            float rawDamage = (damage * (u.type.hitSize/10f + 1) * ((u.type.armor)/10f + 1) + u.maxHealth * 0.2f);
-                            if(u.health <= rawDamage * 2){
-                                Unit ut = u.type.create(b.team);
-                                ut.health(u.health);
-                                ut.rotation(u.rotation());
-                                ut.set(u);
-                                ut.add();
-                                u.remove();
-                                if(u != null) Groups.unit.remove(u);
-                            } else u.health -= rawDamage;
-                        }
-                        super.hitEntity(b, entity, health);
+                        });
+                        hitSound = Sounds.shootLancer;
+                        hitShake = despawnShake = 10;
                     }
 
-                    @Override
-                    public void updateHoming(Bullet b) {
-                        if(b.time >= homingDelay){
-                            float realAimX = b.aimX < 0 ? b.x : b.aimX;
-                            float realAimY = b.aimY < 0 ? b.y : b.aimY;
+                    public void update(Bullet b) {
+                        Unit tc = Units.bestEnemy(b.team, b.x, b.y, speed * lifetime + 16, (u) -> u.checkTarget(true, true) && !(u instanceof bossEntity) && u.type != null && (u.type.hitSize >= 50 || u.type.armor >= 50 || u.maxHealth >= 50000), UnitSorts.strongest);
+                        if (tc != null) {
+                            if (tc.type != null) {
+                                if (tc instanceof bossEntity) {
+                                    return;
+                                }
 
-                            Teamc target;
-                            //home in on allies if possible
-                            if(heals()){
-                                target = Units.closestTarget(null, realAimX, realAimY, speed * lifetime,
-                                        e -> e.checkTarget(collidesAir, collidesGround) && e.team != b.team && !b.hasCollided(e.id),
-                                        t -> collidesGround && (t.team != b.team || t.damaged()) && !b.hasCollided(t.id)
-                                );
-                            }else{
-                                if(b.aimTile != null && b.aimTile.build != null && b.aimTile.build.team != b.team && collidesGround && !b.hasCollided(b.aimTile.build.id)){
-                                    target = b.aimTile.build;
-                                }else{
-                                    target = Units.closestTarget(b.team, realAimX, realAimY, speed * lifetime,
-                                            e -> e != null && e.checkTarget(collidesAir, collidesGround) && !b.hasCollided(e.id),
-                                            t -> t != null && collidesGround && !b.hasCollided(t.id));
+                                EUFx.rgX.at(tc.x, tc.y, 0, EUGet.MIKU, tc.hitSize);
+                                float rawDamage = damage * (tc.type.hitSize / 10 + 1) * (tc.type.armor / 10 + 1) + tc.maxHealth * 0.2f;
+                                if (tc.health <= rawDamage * 2) {
+                                    if (!Vars.net.client()) {
+                                        Unit ut = tc.type.create(b.team);
+                                        ut.health(tc.health);
+                                        ut.rotation(tc.rotation());
+                                        ut.set(tc);
+                                        ut.add();
+                                        tc.remove();
+                                        Groups.unit.remove(tc);
+                                    }
+                                } else {
+                                    tc.health -= rawDamage;
                                 }
                             }
 
-                            if(target != null){
+                            b.remove();
+                        }
+
+                        super.update(b);
+                    }
+
+                    public void hitEntity(Bullet b, Hitboxc entity, float health) {
+                        if (entity instanceof Unit u) {
+                            if (u.type != null) {
+                                if (entity instanceof bossEntity) {
+                                    return;
+                                }
+
+                                float rawDamage = damage * (u.type.hitSize / 10 + 1) * (u.type.armor / 10 + 1) + u.maxHealth * 0.2f;
+                                if (u.health <= rawDamage * 2) {
+                                    Unit ut = u.type.create(b.team);
+                                    ut.health(u.health);
+                                    ut.rotation(u.rotation());
+                                    ut.set(u);
+                                    ut.add();
+                                    u.remove();
+                                    Groups.unit.remove(u);
+                                } else {
+                                    u.health -= rawDamage;
+                                }
+                            }
+                        }
+
+                        super.hitEntity(b, entity, health);
+                    }
+
+                    public void updateHoming(Bullet b) {
+                        if (b.time >= homingDelay) {
+                            float realAimX = b.aimX < 0 ? b.x : b.aimX;
+                            float realAimY = b.aimY < 0 ? b.y : b.aimY;
+                            Teamc target;
+                            if (heals()) {
+                                target = Units.closestTarget(null, realAimX, realAimY, speed * lifetime, (e) -> e.checkTarget(collidesAir, collidesGround) && e.team != b.team && !b.hasCollided(e.id), (t) -> collidesGround && (t.team != b.team || t.damaged()) && !b.hasCollided(t.id));
+                            } else if (b.aimTile != null && b.aimTile.build != null && b.aimTile.build.team != b.team && collidesGround && !b.hasCollided(b.aimTile.build.id)) {
+                                target = b.aimTile.build;
+                            } else {
+                                target = Units.closestTarget(b.team, realAimX, realAimY, speed * lifetime, (e) -> e != null && e.checkTarget(collidesAir, collidesGround) && !b.hasCollided(e.id), (t) -> t != null && collidesGround && !b.hasCollided(t.id));
+                            }
+
+                            if (target != null) {
                                 b.vel.setAngle(Angles.moveToward(b.rotation(), b.angleTo(target), 5 * Time.delta));
                             }
                         }
+
                     }
 
-                    @Override
                     public void draw(Bullet b) {
                         super.draw(b);
                         Draw.color(eccl);
-                        Draw.z(Layer.bullet);
+                        Draw.z(100);
                         Drawf.tri(b.x, b.y, 30, 40, b.rotation());
                     }
                 };
+//                bullet = new BulletType(){{
+//                    damage = 600;
+//                    collidesTiles = hittable = absorbable = reflectable = false;
+//                    speed = 50;
+//                    lifetime = 200 * 8 / speed;
+//                    trailEffect = new Effect(40, e -> {
+//                        Draw.color(e.color);
+//                        rand.setSeed(e.id);
+//                        float fin = 1 - Mathf.curve(e.fout(), 0, 0.85f);
+//                        Tmp.v1.set((rand.chance(0.5f) ? 20 : -20) * (rand.chance(0.2f) ? 0 : fin), 0).rotate(e.rotation - 90);
+//                        float ex = e.x + Tmp.v1.x;
+//                        float ey = e.y + Tmp.v1.y;
+//                        Draw.rect(name("aim-shoot"), ex, ey, 80 * e.fout(), 80 * e.fout(), e.rotation - 90);
+//                    });
+//                    trailInterval = 0.2f;
+//                    trailColor = eccl;
+//                    trailRotation = true;
+//                    trailWidth = 8;
+//                    trailLength = 12;
+//                    hitEffect = despawnEffect = new Effect(90, e -> {
+//                        float fin = Mathf.curve(e.fin(), 0, 0.09f);
+//                        float fout = Mathf.curve(e.fout(), 0, 0.95f);
+//                        for(int i = 0; i < 4; i ++){
+//                            float ang = 90 * i;
+//                            Draw.z(Layer.effect);
+//                            Draw.color(eccb);
+//                            Drawf.tri(e.x, e.y, 19 * fout, 90 * fin, ang);
+//                            Drawf.tri(e.x, e.y, 15 * fout, 72 * fin, 45 + ang);
+//
+//                            Draw.color(Color.black);
+//                            Draw.z(Layer.effect + 1);
+//                            Drawf.tri(e.x, e.y, 15 * fout, 82 * fin, ang);
+//                            Drawf.tri(e.x, e.y, 11 * fout, 66 * fin, 45 + ang);
+//                        }
+//                    });
+//                    hitSound = Sounds.shootLancer;
+//                    hitShake = despawnShake = 10;
+//                }
+//
+//                    @Override
+//                    public void hitEntity(Bullet b, Hitboxc entity, float health) {
+//                        if(entity instanceof Unit u && u.type != null){
+//                            if(entity instanceof bossEntity) return;
+//                            float rawDamage = (damage * (u.type.hitSize/10f + 1) * ((u.type.armor)/10f + 1) + u.maxHealth * 0.2f);
+//                            if(u.health <= rawDamage * 2){
+//                                Unit ut = u.type.create(b.team);
+//                                ut.health(u.health);
+//                                ut.rotation(u.rotation());
+//                                ut.set(u);
+//                                ut.add();
+//                                u.remove();
+//                                if(u != null) Groups.unit.remove(u);
+//                            } else u.health -= rawDamage;
+//                        }
+//                        super.hitEntity(b, entity, health);
+//                    }
+//
+//                    @Override
+//                    public void updateHoming(Bullet b) {
+//                        if(b.time >= homingDelay){
+//                            float realAimX = b.aimX < 0 ? b.x : b.aimX;
+//                            float realAimY = b.aimY < 0 ? b.y : b.aimY;
+//
+//                            Teamc target;
+//                            //home in on allies if possible
+//                            if(heals()){
+//                                target = Units.closestTarget(null, realAimX, realAimY, speed * lifetime,
+//                                        e -> e.checkTarget(collidesAir, collidesGround) && e.team != b.team && !b.hasCollided(e.id),
+//                                        t -> collidesGround && (t.team != b.team || t.damaged()) && !b.hasCollided(t.id)
+//                                );
+//                            }else{
+//                                if(b.aimTile != null && b.aimTile.build != null && b.aimTile.build.team != b.team && collidesGround && !b.hasCollided(b.aimTile.build.id)){
+//                                    target = b.aimTile.build;
+//                                }else{
+//                                    target = Units.closestTarget(b.team, realAimX, realAimY, speed * lifetime,
+//                                            e -> e != null && e.checkTarget(collidesAir, collidesGround) && !b.hasCollided(e.id),
+//                                            t -> t != null && collidesGround && !b.hasCollided(t.id));
+//                                }
+//                            }
+//
+//                            if(target != null){
+//                                b.vel.setAngle(Angles.moveToward(b.rotation(), b.angleTo(target), 5 * Time.delta));
+//                            }
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void draw(Bullet b) {
+//                        super.draw(b);
+//                        Draw.color(eccl);
+//                        Draw.z(Layer.bullet);
+//                        Drawf.tri(b.x, b.y, 30, 40, b.rotation());
+//                    }
+//                };
 
                 mountType = reRotMount::new;
             }
@@ -1849,26 +1973,25 @@ public class EUUnitTypes {
                 lTime = 8;
             }};
 
-            SurgeVolt lineBullet = new SurgeVolt(150, 8) {
-                {
-                    this.maxTarget = 12;
-                    this.targetRange = 120;
-                    this.voltDamageMp = 0.8f;
-                    this.pierceArmor = true;
-                    this.absorbable = false;
-                    this.lifetime = 150;
-                    this.speed = 3;
-                    this.status = StatusEffects.sapped;
-                    this.statusDuration = 120;
-                    this.trailLength = 18;
-                    this.trailWidth = 8;
-                    this.trailColor = this.color = Pal.sapBulletBack;
-                    this.trailInterval = 3;
-                    this.trailRotation = true;
-                    this.splashDamage = 150;
-                    this.splashDamageRadius = 100;
-                    this.hitShake = 4;
-                    this.trailEffect = new Effect(16, (e) -> {
+            SurgeVolt lineBullet = new SurgeVolt(150, 8) {{
+                    maxTarget = 12;
+                    targetRange = 120;
+                    voltDamageMp = 0.8f;
+                    pierceArmor = true;
+                    absorbable = false;
+                    lifetime = 150;
+                    speed = 3;
+                    status = StatusEffects.sapped;
+                    statusDuration = 120;
+                    trailLength = 18;
+                    trailWidth = 8;
+                    trailColor = color = Pal.sapBulletBack;
+                    trailInterval = 3;
+                    trailRotation = true;
+                    splashDamage = 150;
+                    splashDamageRadius = 100;
+                    hitShake = 4;
+                    trailEffect = new Effect(16, (e) -> {
                         Draw.color(Pal.sapBulletBack);
 
                         for(int s : Mathf.signs) {
@@ -1876,26 +1999,24 @@ public class EUUnitTypes {
                         }
 
                     });
-                    this.despawnHit = true;
-                    this.despawnEffect = new Effect(18, (e) -> {
-                        Draw.color(this.trailColor);
+                    despawnHit = true;
+                    despawnEffect = new Effect(18, (e) -> {
+                        Draw.color(trailColor);
                         Lines.stroke(e.fout() * 2 + 0.2f);
-                        Lines.circle(e.x, e.y, e.fin() * this.splashDamageRadius);
+                        Lines.circle(e.x, e.y, e.fin() * splashDamageRadius);
                     });
-                    this.useChainBullet = true;
-                    this.chainBullet = new ChainLightningFade(24, 9, 2.4f, this.color, 25, Fx.hitLancer) {
-                        {
-                            this.pierceArmor = true;
-                            this.status = StatusEffects.sapped;
-                            this.statusDuration = 60;
-                        }
-                    };
-                    this.despawnSound = Sounds.shootArc;
-                    this.homingPower = 0.08f;
-                    this.homingRange = 256;
-                    this.homingDelay = 30;
-                    this.keepVelocity = false;
-                    this.collides = false;
+                    useChainBullet = true;
+                    chainBullet = new ChainLightningFade(24, 9, 2.4f, color, 25, Fx.hitLancer) {{
+                            pierceArmor = true;
+                            status = StatusEffects.sapped;
+                            statusDuration = 60;
+                    }};
+                    despawnSound = Sounds.shootArc;
+                    homingPower = 0.08f;
+                    homingRange = 256;
+                    homingDelay = 30;
+                    keepVelocity = false;
+                    collides = false;
                 }
             };
 
@@ -2847,7 +2968,8 @@ public class EUUnitTypes {
                     new Rect(-113, -133, 70, 90)
             };
 
-            immunities.addAll(StatusEffects.unmoving, StatusEffects.burning, StatusEffects.sapped, EUStatusEffects.awsl);
+            //immunities.addAll(StatusEffects.unmoving, StatusEffects.burning, StatusEffects.sapped, EUStatusEffects.awsl);
+            immunities = ObjectSet.with(StatusEffects.unmoving, StatusEffects.burning, StatusEffects.sapped, EUStatusEffects.awsl);
 
             abilities.add(new PcShieldArcAbility(){{
                 whenShooting = false;
@@ -3301,8 +3423,9 @@ public class EUUnitTypes {
             engineSize = 6;
             engineOffset = 22.3f;
 
-            immunities.addAll(StatusEffects.wet, StatusEffects.freezing, StatusEffects.sapped, StatusEffects.disarmed, StatusEffects.electrified, EUStatusEffects.speedDown, EUStatusEffects.awsl);
-            
+            //immunities.addAll(StatusEffects.wet, StatusEffects.freezing, StatusEffects.sapped, StatusEffects.disarmed, StatusEffects.electrified, EUStatusEffects.speedDown, EUStatusEffects.awsl);
+            immunities = ObjectSet.with(StatusEffects.wet, StatusEffects.freezing, StatusEffects.sapped, StatusEffects.disarmed, StatusEffects.electrified, EUStatusEffects.speedDown, EUStatusEffects.awsl);
+
             abilities.add(
                     new SuppressionFieldAbility() {{
                             orbRadius = 8;
@@ -3860,7 +3983,8 @@ public class EUUnitTypes {
             alwaysShootWhenMoving = true;
             maxRange = 50 * 8f;
 
-            immunities.addAll(StatusEffects.wet, StatusEffects.unmoving, StatusEffects.disarmed, StatusEffects.slow, EUStatusEffects.awsl);
+            //immunities.addAll(StatusEffects.wet, StatusEffects.unmoving, StatusEffects.disarmed, StatusEffects.slow, EUStatusEffects.awsl);
+            immunities = ObjectSet.with(StatusEffects.wet, StatusEffects.unmoving, StatusEffects.disarmed, StatusEffects.slow, EUStatusEffects.awsl);
 
             weapons.add(
                     new Weapon(name("arcana-wm")){{
