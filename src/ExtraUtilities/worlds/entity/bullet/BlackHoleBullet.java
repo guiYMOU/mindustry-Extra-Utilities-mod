@@ -19,7 +19,10 @@ import mindustry.entities.Units;
 import mindustry.entities.bullet.BulletType;
 import mindustry.gen.Bullet;
 import mindustry.gen.Groups;
+import mindustry.graphics.Layer;
 import mindustry.type.unit.MissileUnitType;
+
+import static ExtraUtilities.input.EUAtLoad.hasOtherContentMod;
 
 public class BlackHoleBullet extends BulletType {
     public float inRad, outRad, rotateSpeed;
@@ -56,7 +59,15 @@ public class BlackHoleBullet extends BulletType {
 //            Draw.color();
 //        } else 
         MainRenderer.addBlackHole(b.x, b.y, inRad * in, outRad * in, Math.min(1, in + 0.1f));
+        if(hasOtherContentMod){
+            float z = Draw.z();
+            Draw.z(Layer.flyingUnitLow - 1);
+            Draw.color(Color.black);
+            Fill.circle(b.x, b.y, inRad * in);
 
+            Draw.z(z);
+            Draw.reset();
+        }
         super.draw(b);
     }
 

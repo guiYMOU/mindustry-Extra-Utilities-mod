@@ -96,11 +96,11 @@ public class antiMissile extends BasicBulletType {
     @Override
     public void removed(Bullet b) {
         Groups.bullet.intersect(b.x - clearRange, b.y - clearRange, clearRange * 2, clearRange * 2, bt -> {
-            if(bt.within(b, clearRange + 8)) bt.time += bt.lifetime;
+            if(bt.team != b.team && bt.within(b, clearRange + 8)) bt.time += bt.lifetime;
         });
 
         Units.nearbyEnemies(b.team, b.x, b.y, clearRange, u -> {
-            if(u.type instanceof MissileUnitType) u.kill();
+            if(u.team != b.team && u.type instanceof MissileUnitType) u.kill();
         });
 
         clear.at(b.x, b.y, clearRange, b.team.color);

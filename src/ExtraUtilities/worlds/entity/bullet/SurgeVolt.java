@@ -10,6 +10,7 @@ import ExtraUtilities.content.EUGet;
 import arc.graphics.Color;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
+import arc.math.Mathf;
 import arc.struct.Seq;
 import arc.util.Nullable;
 import arc.util.pooling.Pools;
@@ -38,6 +39,8 @@ public class SurgeVolt extends BulletType {
     public boolean useChainBullet;
     public ChainLightningFade chainBullet;
     public Color color;
+
+    public boolean chainTile = false;
 
     public SurgeVolt(float damage, float size) {
         this.chainEffect = Fx.none;
@@ -112,8 +115,15 @@ public class SurgeVolt extends BulletType {
                         }
                     }
                 }
-
             });
+
+            if(chainTile && chainBullet != null){
+                for(int i = 0; i < 3; i++){
+                    float rx = Mathf.random(-32, 32);
+                    float ry = Mathf.random(-32, 32);
+                    chainBullet.create(v, v.team, v.x + rx, v.y + ry, 0, -1, 1, 1, v);
+                }
+            }
         }
 
     }
