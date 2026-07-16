@@ -20,13 +20,13 @@ repositories{
     maven{ url 'https://www.jitpack.io' }
 }
 
-targetCompatibility = 8
+targetCompatibility = 17
 sourceCompatibility = 17
 
 ext{
     //the build number that this mod is made for
-    mindustryVersion = 'v158.1'
-    arcVersion = 'v158.1'
+    mindustryVersion = 'v159.2'
+    arcVersion = 'v159.1'
     jabelVersion = "93fde537c7"
     //sdkVersion = '37'
     sdkRoot = System.getenv("ANDROID_HOME")
@@ -38,7 +38,7 @@ allprojects{
 
         options.encoding = 'UTF-8'
 
-        options.compilerArgs.addAll(['--release', '8'])
+        options.compilerArgs.addAll(['--release', '17'])
     }
 }
 
